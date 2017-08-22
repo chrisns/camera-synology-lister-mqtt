@@ -1,0 +1,1 @@
+same as https://github.com/pinked/camera-synology-lister but publishes to mqtt rather than running a webservice
