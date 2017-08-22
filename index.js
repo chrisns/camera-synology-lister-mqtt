@@ -23,7 +23,7 @@ authenticate()
   .then(get_feed_urls)
   .tap(console.info)
   .each((url, i) => client.publish(`${TOPIC_PREFIX}/${i}`, url, {retain: true}))
-  .finally(() => process.exit(0))
+  .finally(() => client.end(false, () => process.exit(0)))
 
 const client = mqtt.connect(MQTT_HOST, {
   username: MQTT_USER,
