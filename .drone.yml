@@ -1,0 +1,17 @@
+pipeline:
+
+  docker:
+    image: plugins/docker
+    repo: pinked/camera-synology-lister-mqtt
+    tags:
+      - latest
+      - ${DRONE_BUILD_NUMBER}
+    secrets: [ docker_username, docker_password ]
+
+  deploy:
+    image: docker
+    secrets: [ SYNOLOGY_USER, SYNOLOGY_PASS, SYNOLOGY_HOST, MQTT_HOST, MQTT_USER, MQTT_PASS, TOPIC_PREFIX ]
+    commands:
+      - docker deploy --compose-file docker-compose.yml cameras-mqtt
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
