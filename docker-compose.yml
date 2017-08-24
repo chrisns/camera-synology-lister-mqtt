@@ -3,13 +3,13 @@ services:
   cams:
     read_only: true
     deploy:
-      replicas: 0
+      replicas: 1
       labels:
         - com.df.cron2=true
         - com.df.distribute=true
         - com.df.schedule=0 30 * * * *
       restart_policy:
-        condition: none
+        condition: on-failure
     image: pinked/camera-synology-lister-mqtt:${DRONE_BUILD_NUMBER}
     environment:
       - SYNOLOGY_USER=${SYNOLOGY_USER}
