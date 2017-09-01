@@ -22,7 +22,7 @@ authenticate()
   .then(get_cameras)
   .then(get_feed_urls)
   .tap(console.info)
-  .each((url, i) => client.publish(`${TOPIC_PREFIX}/${i}`, url, {retain: true}))
+  .each((url, i) => publish(`${TOPIC_PREFIX}/${i}`, url, {retain: true}))
   .finally(() => client.end(false, () => process.exit(0)))
 
 const client = mqtt.connect(MQTT_HOST, {
@@ -30,3 +30,10 @@ const client = mqtt.connect(MQTT_HOST, {
   password: MQTT_PASS
 })
 
+const publish = (topic, message, options = {}) =>
+  new Promise((resolve, reject) => {
+    client.publish(topic, message, options, err => {
+      if (err) reject(err)
+      resolve()
+    })
+  })
