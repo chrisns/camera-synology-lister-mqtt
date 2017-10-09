@@ -1,5 +1,4 @@
 const request = require('request-promise')
-const _ = require('lodash')
 const mqtt = require('mqtt')
 
 const {SYNOLOGY_HOST, SYNOLOGY_USER, SYNOLOGY_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, TOPIC_PREFIX} = process.env;
@@ -16,13 +15,18 @@ const get_cameras = () => request(`${SYNOLOGY_HOST}/webapi/entry.cgi?api=SYNO.Su
   .tap(console.info)
   .then(response => cameras = response.data.cameras)
 
-const get_feed_urls = () => _.map(cameras, camera => `${SYNOLOGY_HOST}/webapi/SurveillanceStation/videoStreaming.cgi?api=SYNO.SurveillanceStation.VideoStream&version=1&method=Stream&cameraId=${camera.id}&format=mjpeg&_sid=${session_id}`)
+const get_feed_urls = () => cameras.map(camera => {
+  return {
+    name: camera.name,
+    url: `${SYNOLOGY_HOST}/webapi/SurveillanceStation/videoStreaming.cgi?api=SYNO.SurveillanceStation.VideoStream&version=1&method=Stream&cameraId=${camera.id}&format=mjpeg&_sid=${session_id}`
+  }
+})
 
 authenticate()
   .then(get_cameras)
   .then(get_feed_urls)
   .tap(console.info)
-  .each((url, i) => publish(`${TOPIC_PREFIX}/${i}`, url, {retain: true}))
+  .each((url, i) => publish(`${TOPIC_PREFIX}/${i}`, JSON.stringify(url), {retain: true}))
   .finally(() => client.end(false, () => process.exit(0)))
 
 const client = mqtt.connect(MQTT_HOST, {
